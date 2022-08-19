@@ -1,15 +1,15 @@
 var CACHE_NAME = 'my-site-cache-v4';
 var urlsToCache = [
   //'./resources/',
-  'resources/sap-ui-core.js',
-  './index.html',
+//   'resources/sap-ui-core.js',
+  'index.html',
   'manifest.json',
   'Component.js',
-  'resources/sap/ui/core/library-preload.js',
-  'resources/sap/ui/core/themes/sap_belize_plus/library.css',
-  'resources/sap/ui/core/themes/base/fonts/SAP-icons.woff2',
-  'resources/sap/m/library-preload.js',
-  'resources/sap/m/themes/sap_belize_plus/library.css'
+//   'resources/sap/ui/core/library-preload.js',
+//   'resources/sap/ui/core/themes/sap_belize_plus/library.css',
+//   'resources/sap/ui/core/themes/base/fonts/SAP-icons.woff2',
+//   'resources/sap/m/library-preload.js',
+//   'resources/sap/m/themes/sap_belize_plus/library.css'
 ];
 var resourcesToCache = [];
 
