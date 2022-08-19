@@ -3,7 +3,7 @@
     "theme_color": "#f69435",
     "background_color": "#f69435",
     "display": "standalone",
-    "start_url": "/index.js",
+    "start_url": "/",
     "name": "Test",
     "short_name": "test",
     "description": "testw",
