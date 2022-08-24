@@ -5,6 +5,7 @@ var urlsToCache = [
   'index.html',
   'manifest.json',
   'Component.js',
+  'register-worker.js'
 //   'resources/sap/ui/core/library-preload.js',
 //   'resources/sap/ui/core/themes/sap_belize_plus/library.css',
 //   'resources/sap/ui/core/themes/base/fonts/SAP-icons.woff2',
@@ -51,44 +52,61 @@ self.addEventListener('activate', function (event) {
 	);
 });
 
-  // During runtime, get files from cache or -> fetch, then save to cache
-self.addEventListener('fetch', function (event) {
+//   // During runtime, get files from cache or -> fetch, then save to cache
+// self.addEventListener('fetch', function (event) {
     
-	// only process GET requests
-	if (event.request.method === 'GET') {
-		event.respondWith(
-			caches.match(event.request).then(function (response) {
-				if (response) {
-					return response; // There is a cached version of the resource already
-				}
+// 	// only process GET requests
+// 	if (event.request.method === 'GET') {
+// 		event.respondWith(
+// 			caches.match(event.request).then(function (response) {
+// 				if (response) {
+// 					return response; // There is a cached version of the resource already
+// 				}
 	
-				let requestCopy = event.request.clone();
-				return fetch(requestCopy).then(function (response) {
-					// opaque responses cannot be examined, they will just error
-					if (response.type === 'opaque') {
-						// don't cache opaque response, you cannot validate it's status/success
-						return response;
-					// response.ok => response.status == 2xx ? true : false;
-					} else if (!response.ok) {
-						console.error(response.statusText);
-					} else {
-						return caches.open(CACHE_NAME).then(function(cache) {
-							cache.put(event.request, response.clone());
-							return response;
-						// if the response fails to cache, catch the error
-						}).catch(function(error) {
-							console.error(error);
-							return error;
-						});
-					}
-				}).catch(function(error) {
-					// fetch will fail if server cannot be reached,
-					// this means that either the client or server is offline
-					console.error(error);
-					return caches.match('offline-404.html');
-				});
-			})
-		);
-	}
+// 				let requestCopy = event.request.clone();
+// 				return fetch(requestCopy).then(function (response) {
+// 					// opaque responses cannot be examined, they will just error
+// 					if (response.type === 'opaque') {
+// 						// don't cache opaque response, you cannot validate it's status/success
+// 						return response;
+// 					// response.ok => response.status == 2xx ? true : false;
+// 					} else if (!response.ok) {
+// 						console.error(response.statusText);
+// 					} else {
+// 						return caches.open(CACHE_NAME).then(function(cache) {
+// 							cache.put(event.request, response.clone());
+// 							return response;
+// 						// if the response fails to cache, catch the error
+// 						}).catch(function(error) {
+// 							console.error(error);
+// 							return error;
+// 						});
+// 					}
+// 				}).catch(function(error) {
+// 					// fetch will fail if server cannot be reached,
+// 					// this means that either the client or server is offline
+// 					console.error(error);
+// 					return caches.match('offline-404.html');
+// 				});
+// 			})
+// 		);
+// 	}
     
+// });
+self.addEventListener("fetch", event => {
+    //TODO: OData requests should be cached differently?
+    var request = event.request;
+    if (request.method === 'GET' && !request.url.startsWith("chrome-extension://")) {
+        event.respondWith(
+            caches.match(request).then(cachedResponse => {
+                const networkFetch = catchError(fetch(request).then(response => {
+                    // update the cache with a clone of the network response
+                    return response.ok && response.type !== 'opaque' ? catchError(caches.open(cache_name).then(cache => {
+                        cache.put(request, response.clone());
+                    })) : response;
+                }));
+                // prioritize cached response over network
+                return cachedResponse || networkFetch;
+            }));
+    }
 });
