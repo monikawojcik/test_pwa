@@ -14,43 +14,76 @@ var urlsToCache = [
 ];
 var resourcesToCache = [];
 
-self.addEventListener('install', function(event) {
+async function persistData() {
+    if (navigator.storage && navigator.storage.persist) {
+        const result = await navigator.storage.persist();
+        console.log(`Data persisted: ${result}`);
+    }
+}
 
-    // const cdnBase = 'https://openui5.hana.ondemand.com/resources/';
-	// urlsToCache = urlsToCache.concat([
-	// 	`${cdnBase}sap-ui-core.js`,
-	// 	`${cdnBase}sap/ui/core/library-preload.js`,
-	// 	`${cdnBase}sap/ui/core/themes/sap_belize_plus/library.css`,
-	// 	`${cdnBase}sap/ui/core/themes/base/fonts/SAP-icons.woff2`,
-	// 	`${cdnBase}sap/m/library-preload.js`,
-	// 	`${cdnBase}sap/m/themes/sap_belize_plus/library.css`
-	// ]);
+function catchError(promise) {
+    return promise.catch(err => console.log(err));
+}
 
-    console.log(urlsToCache);
-    console.log(resourcesToCache);
-
-  // Perform install steps
-  event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(function(cache) {
-        console.log('Opened cache');
-        return cache.addAll(urlsToCache);
-      })
-  );
+// This code executes in its own worker or thread
+self.addEventListener("install", event => {
+    console.log("Service Worker Installed");
+    event.waitUntil(
+        catchError(caches.open(cache_name)
+            .then(cache => cache.addAll(urlsToCache)))
+    );
 });
 
-// Delete obsolete caches during activate
-self.addEventListener('activate', function (event) {
-	event.waitUntil(
+self.addEventListener("activate", event => {
+    console.log("Service Worker Activated");
+    event.waitUntil(
 		caches.keys().then(function (keyList) {
 			return Promise.all(keyList.map(function (key) {
-				if (key !== CACHE_NAME) {
+				if (key !== cache_name) {
 					return caches.delete(key);
 				}
 			}));
 		})
 	);
 });
+
+// self.addEventListener('install', function(event) {
+
+//     // const cdnBase = 'https://openui5.hana.ondemand.com/resources/';
+// 	// urlsToCache = urlsToCache.concat([
+// 	// 	`${cdnBase}sap-ui-core.js`,
+// 	// 	`${cdnBase}sap/ui/core/library-preload.js`,
+// 	// 	`${cdnBase}sap/ui/core/themes/sap_belize_plus/library.css`,
+// 	// 	`${cdnBase}sap/ui/core/themes/base/fonts/SAP-icons.woff2`,
+// 	// 	`${cdnBase}sap/m/library-preload.js`,
+// 	// 	`${cdnBase}sap/m/themes/sap_belize_plus/library.css`
+// 	// ]);
+
+//     console.log(urlsToCache);
+//     console.log(resourcesToCache);
+
+//   // Perform install steps
+//   event.waitUntil(
+//     caches.open(CACHE_NAME)
+//       .then(function(cache) {
+//         console.log('Opened cache');
+//         return cache.addAll(urlsToCache);
+//       })
+//   );
+// });
+
+// // Delete obsolete caches during activate
+// self.addEventListener('activate', function (event) {
+// 	event.waitUntil(
+// 		caches.keys().then(function (keyList) {
+// 			return Promise.all(keyList.map(function (key) {
+// 				if (key !== CACHE_NAME) {
+// 					return caches.delete(key);
+// 				}
+// 			}));
+// 		})
+// 	);
+// });
 
 //   // During runtime, get files from cache or -> fetch, then save to cache
 // self.addEventListener('fetch', function (event) {
