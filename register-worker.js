@@ -1,4 +1,4 @@
-var CACHE_NAME = 'my-site-cache-v4';
+var cache_name = 'my-site-cache-v4';
 var urlsToCache = [
   //'./resources/',
 //   'resources/sap-ui-core.js',
