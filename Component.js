@@ -5,7 +5,11 @@ sap.ui.define([
     ],
     function (UIComponent, Device, models) {
         "use strict";
-
+if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register("/register-worker.js")
+                .then(() => console.log('Service Worker Registered'))
+                .catch(err => console.log(err));
+        }
         return UIComponent.extend("project1.Component", {
             metadata: {
                 manifest: "json"
